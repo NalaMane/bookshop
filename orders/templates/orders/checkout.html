@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<h1>Checkout</h1>
+<ul class="list-group mb-3">
+  {% for item in items %}
+  <li class="list-group-item d-flex justify-content-between">
+    <span>{{ item.quantity }} × {{ item.product.name }}</span><span>€{{ item.subtotal }}</span>
+  </li>
+  {% endfor %}
+  <li class="list-group-item d-flex justify-content-between fw-bold"><span>Total</span><span>€{{ total }}</span></li>
+</ul>
+<h5>Shipping to</h5>
+<p>{{ user.get_full_name }}<br>{{ user.profile.address|linebreaksbr|default:"(no address - please add one in your profile)" }}</p>
+<form method="post">{% csrf_token %}
+  <button class="btn btn-success btn-lg">Place order</button>
+</form>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Cart{% endblock %}
+{% block content %}
+<h1>Your cart</h1>
+{% if items %}
+<table class="table align-middle">
+  <thead><tr><th>Book</th><th>Price</th><th>Quantity</th><th>Subtotal</th><th></th></tr></thead>
+  <tbody>
+  {% for item in items %}
+  <tr>
+    <td>{{ item.product.name }}</td>
+    <td>€{{ item.product.price }}</td>
+    <td>
+      <form method="post" action="{% url 'orders:cart_update' item.product.pk %}" class="d-inline">{% csrf_token %}
+        <input type="hidden" name="quantity" value="{{ item.quantity|add:'-1' }}">
+        <button class="btn btn-sm btn-outline-secondary">−</button>
+      </form>
+      <span class="mx-2">{{ item.quantity }}</span>
+      <form method="post" action="{% url 'orders:cart_update' item.product.pk %}" class="d-inline">{% csrf_token %}
+        <input type="hidden" name="quantity" value="{{ item.quantity|add:'1' }}">
+        <button class="btn btn-sm btn-outline-secondary">+</button>
+      </form>
+    </td>
+    <td>€{{ item.subtotal }}</td>
+    <td>
+      <form method="post" action="{% url 'orders:cart_remove' item.product.pk %}">{% csrf_token %}
+        <button class="btn btn-sm btn-outline-danger">Remove</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p class="fs-4 fw-bold">Total: €{{ total }}</p>
+<a class="btn btn-success" href="{% url 'orders:checkout' %}">Go to checkout</a>
+{% else %}
+<p>Your cart is empty. <a href="{% url 'products:list' %}">Browse books</a></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.pk }}{% endblock %}
+{% block content %}
+<h1>Order #{{ order.pk }}</h1>
+<p>Placed {{ order.created_at|date:"d.m.Y H:i" }} · Status: <span class="badge bg-secondary">{{ order.get_status_display }}</span></p>
+<ul class="list-group mb-3">
+  {% for item in order.items.all %}
+  <li class="list-group-item d-flex justify-content-between">
+    <span>{{ item.quantity }} × {{ item.product_name }} (€{{ item.unit_price }})</span><span>€{{ item.subtotal }}</span>
+  </li>
+  {% endfor %}
+  <li class="list-group-item d-flex justify-content-between fw-bold"><span>Total</span><span>€{{ order.total_price }}</span></li>
+</ul>
+<p><strong>Shipping address:</strong><br>{{ order.shipping_address|linebreaksbr }}</p>
+<a href="{% url 'accounts:history' %}">← All my orders</a>
+{% endblock %}

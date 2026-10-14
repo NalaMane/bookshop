@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Books{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Books</h1>
+  {% if user.is_staff %}<a class="btn btn-success" href="{% url 'products:create' %}">+ Add book</a>{% endif %}
+</div>
+<div class="row">
+  {% for product in products %}
+  <div class="col-md-4 mb-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title"><a href="{% url 'products:detail' product.pk %}">{{ product.name }}</a></h5>
+        <p class="text-muted">{{ product.author }}</p>
+        <p class="fw-bold">€{{ product.price }}</p>
+        <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
+          <button class="btn btn-primary btn-sm">Add to cart</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>No books yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

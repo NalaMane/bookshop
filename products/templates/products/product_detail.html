@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<h1>{{ product.name }}</h1>
+<p class="text-muted">{{ product.author }}</p>
+<p>{{ product.description|linebreaks }}</p>
+<p class="fs-4 fw-bold">€{{ product.price }}</p>
+<form method="post" action="{% url 'orders:cart_add' product.pk %}" class="d-inline">{% csrf_token %}
+  <button class="btn btn-primary">Add to cart</button>
+</form>
+{% if user.is_staff %}
+  <a class="btn btn-outline-secondary" href="{% url 'products:edit' product.pk %}">Edit</a>
+  <a class="btn btn-outline-danger" href="{% url 'products:delete' product.pk %}">Delete</a>
+{% endif %}
+{% endblock %}

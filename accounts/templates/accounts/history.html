@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Purchase history{% endblock %}
+{% block content %}
+<h1>Purchase history</h1>
+{% for order in orders %}
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between">
+    <span>Order #{{ order.pk }} · {{ order.created_at|date:"d.m.Y H:i" }}</span>
+    <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+  </div>
+  <ul class="list-group list-group-flush">
+    {% for item in order.items.all %}
+    <li class="list-group-item">{{ item.quantity }} × {{ item.product_name }} — €{{ item.subtotal }}</li>
+    {% endfor %}
+  </ul>
+  <div class="card-footer fw-bold">Total: €{{ order.total_price }}</div>
+</div>
+{% empty %}
+<p>You haven't ordered anything yet.</p>
+{% endfor %}
+{% endblock %}
