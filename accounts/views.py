@@ -6,9 +6,12 @@ Improve freely: validation messages, styling, password change, etc.
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
 
-from .forms import AddressForm, RegisterForm, UserUpdateForm
+from .forms import AddressForm, RegisterForm, StyledPasswordChangeForm, UserUpdateForm
 
 
 def register(request):
@@ -38,3 +41,12 @@ def profile(request):
 def purchase_history(request):
     orders = request.user.orders.prefetch_related("items")
     return render(request, "accounts/history.html", {"orders": orders})
+
+
+class PasswordChange(SuccessMessageMixin, PasswordChangeView):
+    """Built-in Django view: checks the old password, saves the new one and keeps the user logged in."""
+
+    form_class = StyledPasswordChangeForm
+    template_name = "accounts/password_change.html"
+    success_url = reverse_lazy("accounts:profile")
+    success_message = "Your password was changed."
