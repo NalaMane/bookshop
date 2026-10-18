@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 
 from products.models import Product
 
-from .cart import Cart
+from .cart import MAX_ITEM_QUANTITY, Cart
 from .models import Order, OrderItem
 
 
@@ -23,7 +23,11 @@ def cart_detail(request):
 @require_POST
 def cart_add(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
-    Cart(request).add(product.pk)
+    try:
+        Cart(request).add(product.pk)
+    except ValueError:
+        messages.error(request, f"You cannot add more than {MAX_ITEM_QUANTITY} of this book.")
+        return redirect("orders:cart")
     messages.success(request, f'"{product.name}" added to cart.')
     return redirect(request.META.get("HTTP_REFERER", "orders:cart"))
 
@@ -31,14 +35,30 @@ def cart_add(request, product_id):
 @require_POST
 def cart_update(request, product_id):
     """Set the quantity. Template sends quantity = current +/- 1. 0 removes the item."""
-    quantity = int(request.POST.get("quantity", 1))
-    Cart(request).set(product_id, quantity)
+    raw_quantity = request.POST.get("quantity", "")
+    try:
+        quantity = int(raw_quantity)
+    except (TypeError, ValueError):
+        messages.error(request, "Please enter a valid quantity.")
+        return redirect("orders:cart")
+
+    if quantity < 0:
+        messages.error(request, "Quantity cannot be negative.")
+        return redirect("orders:cart")
+
+    try:
+        Cart(request).set(product_id, quantity)
+    except ValueError:
+        messages.error(request, f"Quantity cannot exceed {MAX_ITEM_QUANTITY}.")
+        return redirect("orders:cart")
+    messages.success(request, "Basket updated.")
     return redirect("orders:cart")
 
 
 @require_POST
 def cart_remove(request, product_id):
     Cart(request).remove(product_id)
+    messages.success(request, "Item removed from your basket.")
     return redirect("orders:cart")
 
 
@@ -51,10 +71,15 @@ def checkout(request):
         return redirect("orders:cart")
 
     if request.method == "POST":
+        shipping_address = request.user.profile.address.strip()
+        if not shipping_address:
+            messages.error(request, "Please add a shipping address to your profile before ordering.")
+            return redirect("accounts:profile")
+
         with transaction.atomic():
             order = Order.objects.create(
                 customer=request.user,
-                shipping_address=request.user.profile.address,
+                shipping_address=shipping_address,
             )
             for item in items:
                 OrderItem.objects.create(
