@@ -236,3 +236,13 @@ h4, .h4, h5, .h5 { font-size: 1.125rem; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
 }
+/* ---------- form error messages ---------- */
+.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 12px;
+  color: #B42318;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.errorlist li { list-style: none; }
