@@ -3,8 +3,21 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1>Books</h1>
+  <p>Interested in a new book? We have a fine selection for you!</p>
   {% if user.is_staff %}<a class="btn btn-success" href="{% url 'products:create' %}">+ Add book</a>{% endif %}
 </div>
+
+<div class="search">
+  <form method="get" action="{% url 'products:list' %}">
+    <div class="input-group">
+      <input type="search" class="form-control" placeholder="Search books..." name="q">
+      <button class="btn btn-outline-secondary" type="submit">Search</button>
+      <button class="btn btn-outline-secondary" type="submit" name="q" value="">Clear</button>
+    </div>
+  </form>
+</div>
+
+
 <div class="row">
   {% for product in products %}
   <div class="col-md-4 mb-3">
@@ -15,6 +28,7 @@
         <p class="fw-bold">€{{ product.price }}</p>
         <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
           <button class="btn btn-primary btn-sm">Add to cart</button>
+          
         </form>
       </div>
     </div>

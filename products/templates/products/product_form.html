@@ -3,7 +3,30 @@
 {% block content %}
 <h1>{{ title }}</h1>
 <form method="post">{% csrf_token %}
-  {{ form.as_p }}
+ <!--- {{ form.as_p }} 
+  {{ form.price.errors }} -->
+
+  <div class="mb-3">
+    {{ form.name.label_tag }}
+    {{ form.name }}
+</div>
+
+<div class="mb-3">
+    {{ form.author.label_tag }}
+    {{ form.author }}
+</div>
+
+<div class="mb-3">
+    {{ form.description.label_tag }}
+    {{ form.description }}
+</div>
+
+<div class="mb-3">
+    {{ form.price.label_tag }}
+    {{ form.price }}
+    {{ form.price.errors }}
+</div>
+
   <button class="btn btn-success">Save</button>
   <a class="btn btn-link" href="{% url 'products:list' %}">Cancel</a>
 </form>
