@@ -1,0 +1,238 @@
+/* ==========================================================
+   Bookshop theme  (static/css/theme.css)
+   Owner: GP. Loaded AFTER Bootstrap and style.css, so it
+   re-skins the Bootstrap classes the other pages already use.
+   Values come from the Figma Make design.
+   ========================================================== */
+
+:root {
+  --bg: #FAF8F5;
+  --surface: #FFFFFF;
+  --text: #2B2B2B;
+  --muted: #6B6B6B;
+  --border: #E7E3DD;
+  --accent: #5F7A6B;
+  --accent-hover: #50695C;
+  --danger: #95625E;
+  --focus-ring: rgba(95, 122, 107, 0.12);
+
+  --pending-bg: #F8ECD2;   --pending-text: #866823;
+  --shipped-bg: #E2EDF3;   --shipped-text: #456879;
+  --completed-bg: #E1EEE6; --completed-text: #4E715E;
+
+  --font-heading: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --shadow-card: 0 12px 36px rgba(43, 43, 43, 0.06);
+  --shadow-cover: 0 10px 24px rgba(43, 43, 43, 0.14);
+
+  /* tell Bootstrap about our palette */
+  --bs-body-bg: #FAF8F5;
+  --bs-body-color: #2B2B2B;
+  --bs-body-font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bs-body-font-size: 1rem;
+  --bs-secondary-color: #6B6B6B;
+  --bs-border-color: #E7E3DD;
+  --bs-link-color: #5F7A6B;
+  --bs-link-hover-color: #50695C;
+  --bs-link-color-rgb: 95, 122, 107;
+  --bs-link-hover-color-rgb: 80, 105, 92;
+  --bs-primary: #5F7A6B;
+  --bs-primary-rgb: 95, 122, 107;
+  --bs-danger: #95625E;
+  --bs-danger-rgb: 149, 98, 94;
+}
+
+/* ---------- base ---------- */
+body { line-height: 1.5; }
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+.text-muted { color: var(--muted) !important; }
+.container { max-width: 1200px !important; }
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  color: var(--text);
+}
+h1, .h1 { font-size: 2.25rem; line-height: 1.15; }
+h2, .h2 { font-size: 1.5rem; }
+h3, .h3 { font-size: 1.3rem; line-height: 1.25; }
+h4, .h4, h5, .h5 { font-size: 1.125rem; }
+
+/* ---------- navbar ---------- */
+.site-nav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 1.1rem 0;
+  margin-bottom: 0 !important;
+}
+.site-nav .navbar-brand {
+  font-family: var(--font-heading);
+  font-size: 1.625rem;
+  font-weight: 400;
+  color: var(--text);
+}
+.site-nav .nav-link,
+.site-nav .btn-link {
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem 0;
+  text-decoration: none;
+  border: 0;
+  background: none;
+}
+.site-nav .nav-link:hover,
+.site-nav .btn-link:hover { color: var(--accent); }
+
+.cart-badge {
+  display: inline-block;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* ---------- footer ---------- */
+.site-footer {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.btn-sm { border-radius: 8px; font-size: 0.8125rem; }
+
+.btn-primary, .btn-success {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: #5F7A6B;
+  --bs-btn-border-color: #5F7A6B;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #50695C;
+  --bs-btn-hover-border-color: #50695C;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #50695C;
+  --bs-btn-active-border-color: #50695C;
+  --bs-btn-disabled-bg: #5F7A6B;
+  --bs-btn-disabled-border-color: #5F7A6B;
+  --bs-btn-focus-shadow-rgb: 95, 122, 107;
+}
+.btn-outline-primary, .btn-outline-success, .btn-outline-secondary, .btn-outline-dark {
+  --bs-btn-color: #2B2B2B;
+  --bs-btn-bg: #FFFFFF;
+  --bs-btn-border-color: #E7E3DD;
+  --bs-btn-hover-color: #2B2B2B;
+  --bs-btn-hover-bg: #FAF8F5;
+  --bs-btn-hover-border-color: #6B6B6B;
+  --bs-btn-active-color: #2B2B2B;
+  --bs-btn-active-bg: #FAF8F5;
+  --bs-btn-active-border-color: #6B6B6B;
+  --bs-btn-focus-shadow-rgb: 95, 122, 107;
+}
+.btn-secondary, .btn-dark {
+  --bs-btn-color: #2B2B2B;
+  --bs-btn-bg: #FFFFFF;
+  --bs-btn-border-color: #E7E3DD;
+  --bs-btn-hover-color: #2B2B2B;
+  --bs-btn-hover-bg: #FAF8F5;
+  --bs-btn-hover-border-color: #6B6B6B;
+  --bs-btn-active-color: #2B2B2B;
+  --bs-btn-active-bg: #FAF8F5;
+  --bs-btn-active-border-color: #6B6B6B;
+}
+.btn-danger, .btn-outline-danger {
+  --bs-btn-color: #95625E;
+  --bs-btn-bg: #FFFFFF;
+  --bs-btn-border-color: #E7E3DD;
+  --bs-btn-hover-color: #95625E;
+  --bs-btn-hover-bg: #FAF8F5;
+  --bs-btn-hover-border-color: #95625E;
+  --bs-btn-active-color: #95625E;
+  --bs-btn-active-bg: #FAF8F5;
+  --bs-btn-active-border-color: #95625E;
+}
+
+/* ---------- forms ---------- */
+.form-label { font-size: 0.8125rem; font-weight: 500; }
+.form-control, .form-select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--surface);
+  font-size: 0.875rem;
+  padding: 0.6rem 0.85rem;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.form-check-input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- cards ---------- */
+.card {
+  --bs-card-bg: #FFFFFF;
+  --bs-card-border-color: transparent;
+  --bs-card-border-radius: 10px;
+  --bs-card-inner-border-radius: 10px;
+  box-shadow: var(--shadow-card);
+}
+.card-title { font-family: var(--font-heading); font-weight: 400; font-size: 1.3rem; }
+.card-img-top { border-radius: 3px; box-shadow: var(--shadow-cover); }
+.card-footer, .card-header { background: transparent; border-color: var(--border); }
+
+/* ---------- tables ---------- */
+.table {
+  --bs-table-bg: #FFFFFF;
+  --bs-table-border-color: #E7E3DD;
+  --bs-table-striped-bg: #FAF8F5;
+  --bs-table-hover-bg: #FAF8F5;
+  font-size: 0.875rem;
+  vertical-align: middle;
+}
+.table > thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg);
+}
+
+/* ---------- status badges (pending / shipped / completed) ---------- */
+.badge { border-radius: 999px; font-size: 0.6875rem; font-weight: 600; padding: 0.35em 0.8em; }
+.badge.bg-warning, .badge.text-bg-warning { background-color: var(--pending-bg) !important;   color: var(--pending-text) !important; }
+.badge.bg-info,    .badge.text-bg-info    { background-color: var(--shipped-bg) !important;   color: var(--shipped-text) !important; }
+.badge.bg-success, .badge.text-bg-success { background-color: var(--completed-bg) !important; color: var(--completed-text) !important; }
+.badge.bg-secondary, .badge.text-bg-secondary { background-color: var(--border) !important;  color: var(--muted) !important; }
+.badge.bg-primary, .badge.text-bg-primary { background-color: var(--accent) !important; color: #fff !important; }
+.badge.bg-danger,  .badge.text-bg-danger  { background-color: #F4E4E2 !important; color: var(--danger) !important; }
+
+/* ---------- alerts (Django messages) ---------- */
+.alert { border-radius: 8px; font-size: 0.875rem; border: 0; }
+.alert-success { --bs-alert-bg: #E1EEE6; --bs-alert-color: #4E715E; }
+.alert-info    { --bs-alert-bg: #E2EDF3; --bs-alert-color: #456879; }
+.alert-warning { --bs-alert-bg: #F8ECD2; --bs-alert-color: #866823; }
+.alert-danger  { --bs-alert-bg: #F4E4E2; --bs-alert-color: #95625E; }
+
+/* ---------- misc ---------- */
+.list-group-item { border-color: var(--border); }
+.pagination .page-link { color: var(--accent); }
+.pagination .active .page-link { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
