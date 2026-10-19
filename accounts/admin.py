@@ -19,14 +19,15 @@ class CustomerAdmin(UserAdmin):
 
     inlines = [ProfileInline]
     list_display = ("username", "first_name", "last_name", "email", "address", "order_count", "is_staff")
-    search_fields = ("username", "first_name", "last_name", "email", "profile__address")
+    search_fields = ("username", "first_name", "last_name", "email",
+                     "profile__street", "profile__postal_code", "profile__city")
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("profile").annotate(_order_count=Count("orders"))
 
     @admin.display(description="Address")
     def address(self, user):
-        return user.profile.address if hasattr(user, "profile") else ""
+        return user.profile.address.replace("\n", ", ") if hasattr(user, "profile") else ""
 
     @admin.display(description="Orders", ordering="_order_count")
     def order_count(self, user):
@@ -39,5 +40,5 @@ admin.site.register(User, CustomerAdmin)
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "address")
-    search_fields = ("user__username", "user__email", "address")
+    list_display = ("user", "street", "postal_code", "city")
+    search_fields = ("user__username", "user__email", "street", "postal_code", "city")

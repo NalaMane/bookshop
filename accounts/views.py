@@ -27,11 +27,10 @@ def register(request):
 @login_required
 def profile(request):
     user_form = UserUpdateForm(request.POST or None, instance=request.user)
-    address_form = AddressForm(request.POST or None, initial={"address": request.user.profile.address})
+    address_form = AddressForm(request.POST or None, instance=request.user.profile)
     if request.method == "POST" and user_form.is_valid() and address_form.is_valid():
         user_form.save()
-        request.user.profile.address = address_form.cleaned_data["address"]
-        request.user.profile.save()
+        address_form.save()
         messages.success(request, "Profile updated.")
         return redirect("accounts:profile")
     return render(request, "accounts/profile.html", {"user_form": user_form, "address_form": address_form})
