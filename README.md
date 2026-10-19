@@ -18,34 +18,61 @@ Simple web shop built with **Python + Django + SQLite + Bootstrap**.
 ## Setup (first time)
 
 ```bash
-git clone <REPO-URL>
+git clone https://github.com/NalaMane/bookshop.git
 cd bookshop
 python -m venv .venv
 # Windows: .venv\Scripts\activate     Mac/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-python manage.py migrate
-python manage.py seed_books          # adds 10 sample books
-python manage.py createsuperuser     # your own admin login
+# create the .env file with the shared database link (see "Shared database" below)
 python manage.py runserver
 ```
 
 Open http://127.0.0.1:8000 · Admin: http://127.0.0.1:8000/admin
 
+Logins (password `demo12345`): `staff` (admin) · `anna` (customer)
+
 Run tests: `python manage.py test`
 
-## Git workflow
+## Git workflow (no branches – everyone works in their own folder)
 
 ```bash
-git checkout main && git pull           # always start from the latest main
-git checkout -b products                 # your branch: products / accounts / orders / ui
-# ... work ...
-git add . && git commit -m "Add search to book list"
-git push -u origin products
+git pull                                # before you start
+# ... work, then check the site still runs: python manage.py runserver
+git add .
+git commit -m "short description"
+git pull                                # again, right before pushing
+git push
 ```
-Then open a **Pull Request** on GitHub → Nala reviews & merges.
-Pull `main` into your branch every 1–2 days: `git pull origin main`.
 
-If you change a `models.py`, run `python manage.py makemigrations` and commit the new migration file.
+Rules: only edit your own folder · only push if the site runs and `python manage.py test` says OK ·
+changed a `models.py`? run `python manage.py makemigrations`, commit the new migration file, and read the
+shared-database rules below before running `migrate` · git says "conflict"? don't force anything, message Nala.
+
+## Demo data
+
+`python manage.py seed_demo` adds 10 books with covers, 3 sample orders and two logins (password `demo12345`):
+`staff` (admin – add/edit/delete books, change order status) and `anna` (customer with purchase history).
+It is safe to run more than once. On the shared database it only needs to be run once, by one person.
+
+## Shared database (PostgreSQL on Neon)
+
+We all use **one shared database in the cloud**, so books, users and orders are the same for everyone.
+
+**One-time setup on your PC:**
+1. `pip install -r requirements.txt`
+2. In the project folder (next to `manage.py`) create a file called **`.env`**
+   (copy `.env.example` and rename the copy).
+3. Put the real line in it – Nala sends it to you privately:
+   `DATABASE_URL=postgresql://...`
+4. `python manage.py runserver` – you are now on the shared database.
+
+**Rules for the shared database:**
+- Never push `.env` or paste the link anywhere public (it contains the password). `.env` is already in `.gitignore`.
+- Changed a `models.py`? Tell the group **before** running `migrate`, and push your code right after –
+  `migrate` changes the database for everyone.
+- Don't delete other people's test data. Use your own test users.
+- `python manage.py test` always uses a temporary local database, so tests never touch shared data.
+- No `.env` file (or offline)? Django falls back to your own local `db.sqlite3`.
 
 ## Structure
 
@@ -77,8 +104,9 @@ static/css/         custom CSS (GP)
 
 ## Design decisions (for the presentation)
 
+- **Shared PostgreSQL database in the cloud (Neon)**: the whole team works on the same data; the password is kept out of GitHub in a `.env` file; tests run on a separate local SQLite database so they can never damage shared data.
 - **Django**: login, database (ORM) and admin are built in → we focus on shop logic.
-- **SQLite**: zero setup, the database is one file.
+- **SQLite** as fallback and for tests: zero setup, works offline.
 - **One Django app per feature** → each person works in their own folder, almost no merge conflicts.
 - **Cart in the session** → works without login; saved to the database only at checkout.
 - **OrderItem stores name + price at purchase time** → history stays correct if a book's price changes or it is deleted.

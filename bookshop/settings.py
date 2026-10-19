@@ -10,10 +10,18 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import sys
 from pathlib import Path
+
+import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Read private settings (like the shared database link) from the .env file.
+# .env is in .gitignore, so passwords never end up on GitHub. See .env.example.
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -77,12 +85,23 @@ WSGI_APPLICATION = "bookshop.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Database (owner: Nala)
+# - If .env contains DATABASE_URL, we all use the SAME shared PostgreSQL database in the cloud (Neon).
+# - Without it, Django falls back to a local db.sqlite3 file on your own PC.
+# - Tests ("python manage.py test") always use a temporary local SQLite database,
+#   so running tests never touches the shared data.
+RUNNING_TESTS = len(sys.argv) > 1 and sys.argv[1] == "test"
+SQLITE = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=SQLITE,
+        conn_max_age=60,
+        conn_health_checks=True,
+    )
 }
+if RUNNING_TESTS:
+    DATABASES["default"] = dj_database_url.parse(SQLITE)
 
 
 # Password validation
