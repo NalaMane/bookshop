@@ -27,6 +27,13 @@
     {{ form.price.errors }}
 </div>
 
+<div class="mb-3">
+    {{ form.cover_url.label_tag }}
+    {{ form.cover_url }}
+    {{ form.cover_url.errors }}
+    <small class="text-muted d-block">Optional. Paste a link to a cover image (right-click an image online &rarr; "Copy image address").</small>
+</div>
+
   <button class="btn btn-success">Save</button>
   <a class="btn btn-link" href="{% url 'products:list' %}">Cancel</a>
 </form>

@@ -6,7 +6,7 @@ from .models import Product
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ["name", "author", "description", "price"]
+        fields = ["name", "author", "description", "price", "cover_url"]
 
     def clean_price(self):
                 price = self.cleaned_data.get("price")

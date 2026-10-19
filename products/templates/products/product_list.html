@@ -22,6 +22,7 @@
   {% for product in products %}
   <div class="col-md-4 mb-3">
     <div class="card h-100">
+      {% include "products/_cover.html" with product=product css="card-img-top book-cover" %}
       <div class="card-body">
         <h5 class="card-title"><a href="{% url 'products:detail' product.pk %}">{{ product.name }}</a></h5>
         <p class="text-muted">{{ product.author }}</p>
