@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ProductForm
 from .models import Product  
+from orders.cart import Cart
 """connects to the model in models.py"""
 
 
@@ -16,7 +17,13 @@ def product_list(request):
     query = request.GET.get("q")
     products = products.filter(name__icontains=query) if query else products
     print(query)
-    return render(request, "products/product_list.html", {"products": products})
+    cart = Cart(request)
+
+    for product in products:
+        key = str(product.pk)
+        product.quantity = cart.data.get(key, 0)
+
+    return render(request, "products/product_list.html", {"products": products, "cart": cart})
 
 
 def product_detail(request, pk):

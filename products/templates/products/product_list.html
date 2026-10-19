@@ -13,7 +13,7 @@
   <div class="input-group">
     <input type="search" class="form-control" placeholder="Search books by title..." name="q" value="{{ request.GET.q|default:'' }}">
     <button class="btn btn-outline-secondary" type="submit">Search</button>
-    {% if request.GET.q %}<a class="btn btn-outline-secondary" href="{% url 'products:list' %}">Clear</a>{% endif %}
+    <!-- {% if request.GET.q %}<a class="btn btn-outline-secondary" href="{% url 'products:list' %}">Clear</a>{% endif %} -->
   </div>
 </form>
 
@@ -33,9 +33,26 @@
         <p class="book-author">{{ product.author }}</p>
         <div class="book-card-footer">
           <span class="book-price">€{{ product.price }}</span>
+
+          {% if product.quantity == 0 %}
           <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
             <button class="btn btn-primary btn-sm">Add to cart</button>
           </form>
+          {% else %}
+          <div class="btn-group" role="group" aria-label="Cart quantity controls">
+            <form method="post" action="{% url 'orders:cart_update' product.pk %}" class="d-inline">
+              {% csrf_token %}
+              <input type="hidden" name="quantity" value="{{ product.quantity|add:'-1' }}">
+              <button class="btn btn-outline-primary btn-sm">-</button>
+            </form>
+            <div>{{ product.quantity }}</div>
+
+            <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="d-inline">{% csrf_token %}
+              <button class="btn btn-outline-primary btn-sm">+</button>
+            </form>
+          </div>
+          {% endif %}
+          
         </div>
       </div>
     </article>

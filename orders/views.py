@@ -6,6 +6,7 @@ Order status is changed by staff in /admin (Orders list). Improve freely.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.http import request
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -52,7 +53,8 @@ def cart_update(request, product_id):
         messages.error(request, f"Quantity cannot exceed {MAX_ITEM_QUANTITY}.")
         return redirect("orders:cart")
     messages.success(request, "Basket updated.")
-    return redirect("orders:cart")
+    # return redirect("orders:cart")
+    return redirect(request.META.get("HTTP_REFERER", "orders:cart"))
 
 
 @require_POST
