@@ -93,8 +93,8 @@ def checkout(request):
                 )
             order.recalculate_total()
         cart.clear()
-        messages.success(request, f"Thank you! Order #{order.pk} was placed.")
-        return redirect("orders:detail", pk=order.pk)
+        messages.success(request, "Thank you! Your order was placed.")
+        return redirect("products:list")
 
     return render(request, "orders/checkout.html", {"items": items, "total": cart.total()})
 

@@ -28,7 +28,7 @@ class OrderTests(TestCase):
         self.assertEqual(order.total_price, Decimal("20.00"))
         self.assertEqual(order.status, Order.Status.PENDING)
         self.assertEqual(order.items.first().quantity, 2)
-        self.assertRedirects(response, reverse("orders:detail", args=[order.pk]))
+        self.assertRedirects(response, reverse("products:list"))
 
     def test_cart_update_rejects_invalid_quantity(self):
         self.client.post(reverse("orders:cart_add", args=[self.book.pk]))
