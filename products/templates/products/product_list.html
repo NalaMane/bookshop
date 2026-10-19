@@ -1,41 +1,52 @@
 {% extends "base.html" %}
 {% block title %}Books{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1>Books</h1>
-  <p>Interested in a new book? We have a fine selection for you!</p>
+<header class="page-header">
+  <div>
+    <h1>Books</h1>
+    <p class="text-muted mb-0">Interested in a new book? We have a fine selection for you!</p>
+  </div>
   {% if user.is_staff %}<a class="btn btn-success" href="{% url 'products:create' %}">+ Add book</a>{% endif %}
-</div>
+</header>
 
-<div class="search">
-  <form method="get" action="{% url 'products:list' %}">
-    <div class="input-group">
-      <input type="search" class="form-control" placeholder="Search books..." name="q">
-      <button class="btn btn-outline-secondary" type="submit">Search</button>
-      <button class="btn btn-outline-secondary" type="submit" name="q" value="">Clear</button>
-    </div>
-  </form>
-</div>
+<form class="search-bar" method="get" action="{% url 'products:list' %}" role="search">
+  <div class="input-group">
+    <input type="search" class="form-control" placeholder="Search books by title..." name="q" value="{{ request.GET.q|default:'' }}">
+    <button class="btn btn-outline-secondary" type="submit">Search</button>
+    {% if request.GET.q %}<a class="btn btn-outline-secondary" href="{% url 'products:list' %}">Clear</a>{% endif %}
+  </div>
+</form>
 
+{% if request.GET.q %}
+<p class="text-muted small mb-3">{{ products|length }} result{{ products|length|pluralize }} for "{{ request.GET.q }}"</p>
+{% endif %}
 
-<div class="row">
+<div class="row g-4">
   {% for product in products %}
-  <div class="col-md-4 mb-3">
-    <div class="card h-100">
-      {% include "products/_cover.html" with product=product css="card-img-top book-cover" %}
+  <div class="col-6 col-md-4 col-lg-3">
+    <article class="card book-card h-100">
+      <a href="{% url 'products:detail' product.pk %}" class="book-card-cover" aria-label="{{ product.name }}">
+        {% include "products/_cover.html" with product=product size="sm" %}
+      </a>
       <div class="card-body">
-        <h5 class="card-title"><a href="{% url 'products:detail' product.pk %}">{{ product.name }}</a></h5>
-        <p class="text-muted">{{ product.author }}</p>
-        <p class="fw-bold">€{{ product.price }}</p>
-        <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
-          <button class="btn btn-primary btn-sm">Add to cart</button>
-          
-        </form>
+        <h2 class="card-title"><a href="{% url 'products:detail' product.pk %}">{{ product.name }}</a></h2>
+        <p class="book-author">{{ product.author }}</p>
+        <div class="book-card-footer">
+          <span class="book-price">€{{ product.price }}</span>
+          <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
+            <button class="btn btn-primary btn-sm">Add to cart</button>
+          </form>
+        </div>
       </div>
-    </div>
+    </article>
   </div>
   {% empty %}
-  <p>No books yet.</p>
+  <div class="col-12">
+    <div class="empty-state">
+      {% if request.GET.q %}No books match "{{ request.GET.q }}". <a href="{% url 'products:list' %}">Show all books</a>
+      {% else %}No books yet.{% endif %}
+    </div>
+  </div>
   {% endfor %}
 </div>
 {% endblock %}

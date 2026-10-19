@@ -1,14 +1,15 @@
 {% comment %}
-Book cover (owner: Svenja). Shows the image from product.cover_url.
-If there is no link, or the link is broken, a grey placeholder with the title is shown instead.
-Use: {% include "products/_cover.html" with product=product css="..." %}
+Book cover (owner: Svenja). Shows the image from product.cover_url inside a fixed 2:3 frame.
+If there is no link, or the link is broken, a placeholder with the title is shown instead.
+Use: {% include "products/_cover.html" with product=product size="sm" %}   (size: sm = card, lg = detail page)
 {% endcomment %}
-{% if product.cover_url %}
-<img src="{{ product.cover_url }}" alt="Cover of {{ product.name }}" class="{{ css }}"
-     style="height: 280px; object-fit: contain; background: #f4f4f4;"
-     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-{% endif %}
-<div class="{{ css }} align-items-center justify-content-center text-center text-muted p-3"
-     style="height: 280px; background: #eee; display: {% if product.cover_url %}none{% else %}flex{% endif %};">
-  📖<br>{{ product.name }}
+<div class="cover-frame cover-{{ size|default:'sm' }}">
+  {% if product.cover_url %}
+  <img src="{{ product.cover_url }}" alt="Cover of {{ product.name }}" loading="lazy"
+       onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+  {% endif %}
+  <div class="cover-placeholder" {% if product.cover_url %}hidden{% endif %}>
+    <span>{{ product.name }}</span>
+    <small>{{ product.author }}</small>
+  </div>
 </div>

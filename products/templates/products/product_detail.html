@@ -1,22 +1,28 @@
 {% extends "base.html" %}
 {% block title %}{{ product.name }}{% endblock %}
 {% block content %}
-<div class="row g-4">
-  <div class="col-md-4">
-    {% include "products/_cover.html" with product=product css="img-fluid rounded shadow-sm book-cover-large" %}
+<a class="back-link" href="{% url 'products:list' %}">&larr; All books</a>
+
+<div class="row g-4 g-lg-5 align-items-start">
+  <div class="col-sm-5 col-lg-4">
+    {% include "products/_cover.html" with product=product size="lg" %}
   </div>
-  <div class="col-md-8">
-    <h1>{{ product.name }}</h1>
-    <p class="text-muted">{{ product.author }}</p>
-    <p>{{ product.description|linebreaks }}</p>
-    <p class="fs-4 fw-bold">€{{ product.price }}</p>
-    <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="d-inline">{% csrf_token %}
-      <button class="btn btn-primary">Add to cart</button>
-    </form>
-    {% if user.is_staff %}
-      <a class="btn btn-outline-secondary" href="{% url 'products:edit' product.pk %}">Edit</a>
-      <a class="btn btn-outline-danger" href="{% url 'products:delete' product.pk %}">Delete</a>
-    {% endif %}
+  <div class="col-sm-7 col-lg-8">
+    <div class="book-detail">
+      <h1>{{ product.name }}</h1>
+      <p class="book-author">{{ product.author }}</p>
+      <p class="book-price book-price-lg">€{{ product.price }}</p>
+      <div class="book-description">{{ product.description|linebreaks }}</div>
+      <div class="d-flex flex-wrap gap-2">
+        <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
+          <button class="btn btn-primary">Add to cart</button>
+        </form>
+        {% if user.is_staff %}
+          <a class="btn btn-outline-secondary" href="{% url 'products:edit' product.pk %}">Edit</a>
+          <a class="btn btn-outline-danger" href="{% url 'products:delete' product.pk %}">Delete</a>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}
