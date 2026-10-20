@@ -45,7 +45,7 @@
               <input type="hidden" name="quantity" value="{{ product.quantity|add:'-1' }}">
               <button class="btn btn-outline-primary btn-sm">-</button>
             </form>
-            <div>{{ product.quantity }}</div>
+            <div style="padding:5px;">{{ product.quantity }}</div>
 
             <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="d-inline">{% csrf_token %}
               <button class="btn btn-outline-primary btn-sm">+</button>
