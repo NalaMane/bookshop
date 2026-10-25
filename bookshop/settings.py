@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "products",  # Svenja
     "accounts",  # Ami
     "orders",  # Agasi
+    "erp_import",  # Lab 2 – ERP file import
 ]
 
 MIDDLEWARE = [
@@ -150,3 +151,6 @@ LOGOUT_REDIRECT_URL = "products:list"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Lab 2 – ERP file exchange: inbox / processed / failed
+ERP_EXCHANGE_DIR = BASE_DIR / "erp_exchange"

@@ -7,3 +7,9 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# Lab 2 – ERP files are data, not code (keep the empty folders)
+erp_exchange/inbox/*
+erp_exchange/processed/*
+erp_exchange/failed/*
+!erp_exchange/*/.gitkeep

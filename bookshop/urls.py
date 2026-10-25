@@ -6,5 +6,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),  # Ami
     path("orders/", include("orders.urls")),  # Agasi
+    path("erp/", include("erp_import.urls")),  # Lab 2
     path("", include("products.urls")),  # Svenja (homepage = book list)
 ]

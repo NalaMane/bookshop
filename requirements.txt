@@ -2,3 +2,4 @@ Django>=5.2,<5.3
 psycopg[binary]>=3.2,<4      # PostgreSQL driver (shared cloud database)
 dj-database-url>=2.2,<3      # reads DATABASE_URL
 python-dotenv>=1.0,<2        # loads the .env file
+openpyxl>=3.1,<4             # reads the ERP Excel export (Lab 2)
