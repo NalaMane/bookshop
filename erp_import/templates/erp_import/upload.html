@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Import ERP file{% endblock %}
+
+{% block content %}
+<h1 class="mb-2">Import ERP file</h1>
+<p class="text-muted mb-4">Upload the Excel export from the ERP. Products are created or updated by their ERP ID.</p>
+
+<div class="card mb-4" style="max-width: 640px;">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="erp_file" class="form-label">ERP export (.xlsx)</label>
+      <input type="file" name="erp_file" id="erp_file" class="form-control mb-3" accept=".xlsx" required>
+      <button type="submit" class="btn btn-primary">Upload and import</button>
+    </form>
+  </div>
+</div>
+
+{% if file_name %}
+<div class="card" style="max-width: 640px;">
+  <div class="card-body">
+    <h2 class="h4">Result</h2>
+    <p class="text-muted small mb-3">File: {{ file_name }}</p>
+
+    {% if log %}
+    {# Field names follow Ami's plan for ImportLog; adjust them if her model uses other names. #}
+    <table class="table mb-3">
+      <tr><th>Status</th><td>{{ log.status }}</td></tr>
+      <tr><th>Created</th><td>{{ log.created }}</td></tr>
+      <tr><th>Updated</th><td>{{ log.updated }}</td></tr>
+      <tr><th>Failed rows</th><td>{{ log.failed_rows }}</td></tr>
+    </table>
+    {% if log.error_messages %}
+    <p class="fw-semibold mb-1">Errors</p>
+    <p class="errorlist-text">{{ log.error_messages|linebreaksbr }}</p>
+    {% endif %}
+    {% endif %}
+
+    {% if output %}
+    <pre class="small mb-0">{{ output }}</pre>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
