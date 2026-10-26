@@ -6,13 +6,12 @@ Order status is changed by staff in /admin (Orders list). Improve freely.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import request
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from products.models import Product
 
-from .cart import MAX_ITEM_QUANTITY, Cart
+from .cart import Cart
 from .models import Order, OrderItem
 
 
@@ -26,8 +25,8 @@ def cart_add(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     try:
         Cart(request).add(product.pk)
-    except ValueError:
-        messages.error(request, f"You cannot add more than {MAX_ITEM_QUANTITY} of this book.")
+    except ValueError as error:
+        messages.error(request, str(error))
         return redirect("orders:cart")
     messages.success(request, f'"{product.name}" added to cart.')
     return redirect(request.META.get("HTTP_REFERER", "orders:cart"))
@@ -49,8 +48,8 @@ def cart_update(request, product_id):
 
     try:
         Cart(request).set(product_id, quantity)
-    except ValueError:
-        messages.error(request, f"Quantity cannot exceed {MAX_ITEM_QUANTITY}.")
+    except ValueError as error:
+        messages.error(request, str(error))
         return redirect("orders:cart")
     messages.success(request, "Basket updated.")
     # return redirect("orders:cart")
@@ -79,18 +78,45 @@ def checkout(request):
             return redirect("accounts:profile")
 
         with transaction.atomic():
+            locked_products = {
+                product.pk: product
+                for product in Product.objects.select_for_update().filter(
+                    pk__in=[item["product"].pk for item in items]
+                )
+            }
+            for item in items:
+                product = locked_products.get(item["product"].pk)
+                if product is None:
+                    messages.error(request, "A book in your cart is no longer available.")
+                    return redirect("orders:cart")
+                if product.stock is None:
+                    messages.error(
+                        request,
+                        f'"{product.name}" is no longer available for purchase.',
+                    )
+                    return redirect("orders:cart")
+                if item["quantity"] > product.stock:
+                    messages.error(
+                        request,
+                        f'Only {product.stock} of "{product.name}" are currently in stock.',
+                    )
+                    return redirect("orders:cart")
+
             order = Order.objects.create(
                 customer=request.user,
                 shipping_address=shipping_address,
             )
             for item in items:
+                product = locked_products[item["product"].pk]
                 OrderItem.objects.create(
                     order=order,
-                    product=item["product"],
-                    product_name=item["product"].name,
-                    unit_price=item["product"].price,
+                    product=product,
+                    product_name=product.name,
+                    unit_price=product.price,
                     quantity=item["quantity"],
                 )
+                product.stock -= item["quantity"]
+                product.save(update_fields=["stock"])
             order.recalculate_total()
         cart.clear()
         messages.success(request, "Thank you! Your order was placed.")

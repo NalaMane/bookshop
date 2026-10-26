@@ -17,6 +17,7 @@ class Cart:
         new_quantity = self.data.get(key, 0) + quantity
         if new_quantity < 1 or new_quantity > MAX_ITEM_QUANTITY:
             raise ValueError(f"Quantity must be between 1 and {MAX_ITEM_QUANTITY}.")
+        self._validate_stock(product_id, new_quantity)
         self.data[key] = new_quantity
         self._save()
 
@@ -25,6 +26,7 @@ class Cart:
         if quantity > MAX_ITEM_QUANTITY:
             raise ValueError(f"Quantity cannot exceed {MAX_ITEM_QUANTITY}.")
         if quantity > 0:
+            self._validate_stock(product_id, quantity)
             self.data[key] = quantity
         else:
             self.data.pop(key, None)
@@ -66,3 +68,16 @@ class Cart:
 
     def _save(self):
         self.session.modified = True
+
+    @staticmethod
+    def _validate_stock(product_id, quantity):
+        try:
+            product = Product.objects.only("stock").get(pk=product_id)
+        except Product.DoesNotExist as error:
+            raise ValueError("This book is no longer available.") from error
+        if product.stock is None:
+            raise ValueError("This book is not available for purchase.")
+        if quantity > product.stock:
+            raise ValueError(
+                f"Only {product.stock} of this book are currently in stock."
+            )

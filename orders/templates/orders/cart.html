@@ -8,7 +8,14 @@
   <tbody>
   {% for item in items %}
   <tr>
-    <td>{{ item.product.name }}</td>
+    <td>
+      {{ item.product.name }}
+      {% if item.product.stock is None %}
+        <div class="text-danger small">No longer available</div>
+      {% else %}
+        <div class="text-muted small">{{ item.product.stock }} in stock</div>
+      {% endif %}
+    </td>
     <td>€{{ item.product.price }}</td>
     <td>
       <form method="post" action="{% url 'orders:cart_update' item.product.pk %}" class="d-inline">{% csrf_token %}

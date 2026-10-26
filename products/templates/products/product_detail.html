@@ -11,7 +11,9 @@
     <div class="book-detail">
       <h1>{{ product.name }}</h1>
       <p class="book-author">{{ product.author }}</p>
-      {% if user.is_staff %}
+      {% if product.stock is None or product.stock == 0 %}
+        <span class="book-stock text-muted">Out of stock</span>
+      {% else %}
         <span class="book-stock text-muted">{{ product.stock }} in stock</span>
       {% endif %}
       <p class="book-price book-price-lg">€{{ product.price }}</p>
@@ -19,7 +21,7 @@
       <div class="book-description">{{ product.description|linebreaks }}</div>
       <div class="d-flex flex-wrap gap-2">
         <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
-          <button class="btn btn-primary">Add to cart</button>
+          <button class="btn btn-primary" {% if product.stock is None or product.stock == 0 %}disabled{% endif %}>Add to cart</button>
         </form>
         {% if user.is_staff %}
           <a class="btn btn-outline-secondary" href="{% url 'products:edit' product.pk %}">Edit</a>
