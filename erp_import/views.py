@@ -1,7 +1,9 @@
 """Staff-only upload page for ERP files (owner: GP).
 
-Flow: upload .xlsx -> save to erp_exchange/inbox/ -> run the import_products
+Flow: upload file -> save to erp_exchange/inbox/ -> run the import_products
 command (Svenja + Ami) -> show the result.
+The file type is NOT checked here: Ami's read_and_validate() is the single place
+that rejects wrong files, and the rejection shows up in the ImportLog.
 """
 import io
 from datetime import datetime
@@ -31,8 +33,6 @@ def upload(request):
 
         if erp_file is None:
             messages.error(request, "Please choose a file first.")
-        elif not erp_file.name.lower().endswith(".xlsx"):
-            messages.error(request, "Only .xlsx files can be imported.")
         elif erp_file.size > MAX_SIZE:
             messages.error(request, "The file is too large (maximum 5 MB).")
         else:

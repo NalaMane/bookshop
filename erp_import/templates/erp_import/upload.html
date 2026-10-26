@@ -10,8 +10,8 @@
   <div class="card-body">
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      <label for="erp_file" class="form-label">ERP export (.xlsx)</label>
-      <input type="file" name="erp_file" id="erp_file" class="form-control mb-3" accept=".xlsx" required>
+      <label for="erp_file" class="form-label">ERP export (.xlsx or .csv)</label>
+      <input type="file" name="erp_file" id="erp_file" class="form-control mb-3" accept=".xlsx,.csv" required>
       <button type="submit" class="btn btn-primary">Upload and import</button>
     </form>
   </div>
@@ -24,16 +24,17 @@
     <p class="text-muted small mb-3">File: {{ file_name }}</p>
 
     {% if log %}
-    {# Field names follow Ami's plan for ImportLog; adjust them if her model uses other names. #}
     <table class="table mb-3">
-      <tr><th>Status</th><td>{{ log.status }}</td></tr>
-      <tr><th>Created</th><td>{{ log.created }}</td></tr>
-      <tr><th>Updated</th><td>{{ log.updated }}</td></tr>
-      <tr><th>Failed rows</th><td>{{ log.failed_rows }}</td></tr>
+      <tr><th>Status</th><td>{{ log.get_status_display }}</td></tr>
+      <tr><th>Created</th><td>{{ log.created_count }}</td></tr>
+      <tr><th>Updated</th><td>{{ log.updated_count }}</td></tr>
+      <tr><th>Failed rows</th><td>{{ log.failed_count }}</td></tr>
     </table>
-    {% if log.error_messages %}
-    <p class="fw-semibold mb-1">Errors</p>
-    <p class="errorlist-text">{{ log.error_messages|linebreaksbr }}</p>
+    {% if log.errors %}
+    <p class="fw-semibold mb-1">Problems found</p>
+    <ul class="small">
+      {% for message in log.errors %}<li>{{ message }}</li>{% endfor %}
+    </ul>
     {% endif %}
     {% endif %}
 
