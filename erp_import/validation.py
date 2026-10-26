@@ -9,8 +9,8 @@ read_and_validate(path) checks an ERP export file BEFORE anything is saved:
   stock not a whole number or negative, Product ID used more than once.
 
 It returns (rows, errors):
-    rows   = [{"erp_id": "DXTR1000", "name": "MTB", "description": "",
-               "price": Decimal("1200.00"), "stock": 25}, ...]   -> valid rows only
+    rows   = [{"erp_id": "BOOK1001", "name": "1984", "description": "",
+               "price": Decimal("9.99"), "stock": 25}, ...]   -> valid rows only
     errors = ["Row 4: Price 'abc' is not a number", ...]          -> one message per problem
 
 The ERP (SAP Fiori "Export" button) creates an .xlsx file with the columns

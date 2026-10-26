@@ -23,22 +23,22 @@ class ValidFileTests(TestCase):
         rows, errors = read_and_validate(SAMPLES / "valid_erp_export.xlsx")
         self.assertEqual(errors, [])
         by_id = {row["erp_id"]: row for row in rows}
-        self.assertEqual(set(by_id), {"GRVL1000", "DXTR1000"})
-        self.assertEqual(by_id["DXTR1000"], {"erp_id": "DXTR1000", "name": "MTB", "description": "",
-                                             "price": Decimal("1200.00"), "stock": 25})
+        self.assertEqual(set(by_id), {"BOOK1002", "BOOK1001"})
+        self.assertEqual(by_id["BOOK1001"], {"erp_id": "BOOK1001", "name": "1984", "description": "",
+                                             "price": Decimal("9.99"), "stock": 25})
 
     def test_csv_with_semicolon_and_decimal_comma(self):
         rows, errors = read_and_validate(SAMPLES / "valid_export.csv")
         self.assertEqual(errors, [])
-        self.assertEqual([row["price"] for row in rows], [Decimal("1200.00"), Decimal("2300.00")])
+        self.assertEqual([row["price"] for row in rows], [Decimal("9.99"), Decimal("12.99")])
 
     def test_updated_export(self):
         rows, errors = read_and_validate(SAMPLES / "updated_erp_export.xlsx")
         self.assertEqual(errors, [])
         by_id = {row["erp_id"]: row for row in rows}
-        self.assertEqual(by_id["GRVL1000"]["stock"], 0)
-        self.assertEqual(by_id["DXTR1000"]["price"], Decimal("1100.00"))
-        self.assertIn("ROAD2000", by_id)
+        self.assertEqual(by_id["BOOK1002"]["stock"], 0)
+        self.assertEqual(by_id["BOOK1001"]["price"], Decimal("8.99"))
+        self.assertIn("BOOK2001", by_id)
 
 
 class RowErrorTests(TestCase):
@@ -49,8 +49,8 @@ class RowErrorTests(TestCase):
         self.text = "\n".join(self.errors)
 
     def test_good_rows_are_kept(self):
-        self.assertEqual([row["erp_id"] for row in self.rows], ["DXTR1000", "TREK1000"])
-        self.assertEqual(self.rows[1]["price"], Decimal("899.90"))  # "899,90"
+        self.assertEqual([row["erp_id"] for row in self.rows], ["BOOK1001", "BOOK2002"])
+        self.assertEqual(self.rows[1]["price"], Decimal("7.90"))  # "7,90"
 
     def test_every_bad_row_is_reported(self):
         self.assertEqual(len(self.errors), 7)
@@ -60,7 +60,7 @@ class RowErrorTests(TestCase):
         self.assertIn("Row 6: Stock -1 is negative", self.text)
         self.assertIn("Row 7: Product ID is missing", self.text)
         self.assertIn("Row 8: Product Name is missing", self.text)
-        self.assertIn("Row 9: Product ID 'DXTR1000' appears more than once", self.text)
+        self.assertIn("Row 9: Product ID 'BOOK1001' appears more than once", self.text)
 
 
 class FileErrorTests(TestCase):
