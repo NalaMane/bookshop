@@ -34,6 +34,12 @@
         <div class="book-card-footer">
           <span class="book-price">€{{ product.price }}</span>
 
+          {% if product.stock == 0 %}
+            <span class="book-stock text-muted">Out of stock</span>
+          {% else %}
+            <span class="book-stock text-muted">{{ product.stock }} in stock</span> 
+          {% endif %}
+
           {% if product.quantity == 0 %}
           <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
             <button class="btn btn-primary btn-sm">Add to cart</button>

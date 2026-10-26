@@ -11,7 +11,11 @@
     <div class="book-detail">
       <h1>{{ product.name }}</h1>
       <p class="book-author">{{ product.author }}</p>
+      {% if user.is_staff %}
+        <span class="book-stock text-muted">{{ product.stock }} in stock</span>
+      {% endif %}
       <p class="book-price book-price-lg">€{{ product.price }}</p>
+      
       <div class="book-description">{{ product.description|linebreaks }}</div>
       <div class="d-flex flex-wrap gap-2">
         <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
