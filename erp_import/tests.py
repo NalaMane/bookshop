@@ -88,20 +88,20 @@ class SampleFileValidationTests(SimpleTestCase):
 
     def test_valid_export(self):
         rows, errors = read_and_validate(SAMPLES / "valid_erp_export.xlsx")
-        self.assertEqual(self.ids(rows), {"BOOK1002", "BOOK1001"})
+        self.assertEqual(self.ids(rows), {"9780547928227", "9780451524935"})
         self.assertEqual(errors, [])
 
     def test_updated_export_contains_the_changes(self):
         rows, errors = read_and_validate(SAMPLES / "updated_erp_export.xlsx")
         by_id = {row["erp_id"]: row for row in rows}
         self.assertEqual(errors, [])
-        self.assertEqual(by_id["BOOK1001"]["price"], Decimal("8.99"))
-        self.assertEqual(by_id["BOOK1002"]["stock"], 0)
-        self.assertIn("BOOK2001", by_id)
+        self.assertEqual(by_id["9780451524935"]["price"], Decimal("8.99"))
+        self.assertEqual(by_id["9780547928227"]["stock"], 0)
+        self.assertIn("9780441172719", by_id)
 
     def test_rows_with_errors_are_skipped_and_good_rows_kept(self):
         rows, errors = read_and_validate(SAMPLES / "export_with_errors.xlsx")
-        self.assertEqual(self.ids(rows), {"BOOK1001", "BOOK2002"})
+        self.assertEqual(self.ids(rows), {"9780451524935", "9780141439518"})
         bad_rows = {m.group(1) for m in map(re.compile(r"^Row (\d+):").match, errors) if m}
         self.assertEqual(len(bad_rows), 7)
 

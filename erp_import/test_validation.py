@@ -23,8 +23,8 @@ class ValidFileTests(TestCase):
         rows, errors = read_and_validate(SAMPLES / "valid_erp_export.xlsx")
         self.assertEqual(errors, [])
         by_id = {row["erp_id"]: row for row in rows}
-        self.assertEqual(set(by_id), {"BOOK1002", "BOOK1001"})
-        self.assertEqual(by_id["BOOK1001"], {"erp_id": "BOOK1001", "name": "1984", "description": "",
+        self.assertEqual(set(by_id), {"9780547928227", "9780451524935"})
+        self.assertEqual(by_id["9780451524935"], {"erp_id": "9780451524935", "name": "1984", "description": "",
                                              "price": Decimal("9.99"), "stock": 25})
 
     def test_csv_with_semicolon_and_decimal_comma(self):
@@ -36,9 +36,9 @@ class ValidFileTests(TestCase):
         rows, errors = read_and_validate(SAMPLES / "updated_erp_export.xlsx")
         self.assertEqual(errors, [])
         by_id = {row["erp_id"]: row for row in rows}
-        self.assertEqual(by_id["BOOK1002"]["stock"], 0)
-        self.assertEqual(by_id["BOOK1001"]["price"], Decimal("8.99"))
-        self.assertIn("BOOK2001", by_id)
+        self.assertEqual(by_id["9780547928227"]["stock"], 0)
+        self.assertEqual(by_id["9780451524935"]["price"], Decimal("8.99"))
+        self.assertIn("9780441172719", by_id)
 
 
 class RowErrorTests(TestCase):
@@ -49,7 +49,7 @@ class RowErrorTests(TestCase):
         self.text = "\n".join(self.errors)
 
     def test_good_rows_are_kept(self):
-        self.assertEqual([row["erp_id"] for row in self.rows], ["BOOK1001", "BOOK2002"])
+        self.assertEqual([row["erp_id"] for row in self.rows], ["9780451524935", "9780141439518"])
         self.assertEqual(self.rows[1]["price"], Decimal("7.90"))  # "7,90"
 
     def test_every_bad_row_is_reported(self):
@@ -60,7 +60,7 @@ class RowErrorTests(TestCase):
         self.assertIn("Row 6: Stock -1 is negative", self.text)
         self.assertIn("Row 7: Product ID is missing", self.text)
         self.assertIn("Row 8: Product Name is missing", self.text)
-        self.assertIn("Row 9: Product ID 'BOOK1001' appears more than once", self.text)
+        self.assertIn("Row 9: Product ID '9780451524935' appears more than once", self.text)
 
 
 class FileErrorTests(TestCase):

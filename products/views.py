@@ -16,7 +16,6 @@ def product_list(request):
     products = Product.objects.all()
     query = request.GET.get("q")
     products = products.filter(name__icontains=query) if query else products
-    print(query)
     cart = Cart(request)
 
     for product in products:

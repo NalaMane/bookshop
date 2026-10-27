@@ -46,6 +46,10 @@ def upload(request):
                     target.write(chunk)
 
             output = io.StringIO()
+            # remember the newest log before the import, so we only show the log of THIS upload
+            last_log_id = 0
+            if ImportLog is not None:
+                last_log_id = ImportLog.objects.order_by("-id").values_list("id", flat=True).first() or 0
             try:
                 call_command("import_products", stdout=output)
                 messages.success(request, "Import finished.")
@@ -55,6 +59,6 @@ def upload(request):
             context["file_name"] = saved_name
             context["output"] = output.getvalue()
             if ImportLog is not None:
-                context["log"] = ImportLog.objects.order_by("-id").first()
+                context["log"] = ImportLog.objects.filter(id__gt=last_log_id).order_by("-id").first()
 
     return render(request, "erp_import/upload.html", context)

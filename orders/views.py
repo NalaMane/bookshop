@@ -27,7 +27,7 @@ def cart_add(request, product_id):
         Cart(request).add(product.pk)
     except ValueError as error:
         messages.error(request, str(error))
-        return redirect("orders:cart")
+        return redirect(request.META.get("HTTP_REFERER", "orders:cart"))  # stay on the same page
     messages.success(request, f'"{product.name}" added to cart.')
     return redirect(request.META.get("HTTP_REFERER", "orders:cart"))
 
