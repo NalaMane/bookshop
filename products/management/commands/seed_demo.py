@@ -1,7 +1,8 @@
 """Fill the database with demo data for testing and the presentation:
     python manage.py seed_demo
 
-Creates: 10 books, a staff account, a customer account and 3 sample orders.
+Creates: 10 books (with ERP ID = ISBN and stock, see seed_books), a staff account,
+a customer account and 3 sample orders.
 Safe to run more than once (nothing is duplicated).
 """
 from django.contrib.auth.models import User
@@ -50,7 +51,9 @@ class Command(BaseCommand):
                     customer=customer, status=status, shipping_address=customer.profile.address
                 )
                 for name, quantity in lines:
-                    book = Product.objects.get(name=name)
+                    book = Product.objects.filter(name=name).exclude(stock__isnull=True).first()
+                    if book is None:
+                        continue
                     OrderItem.objects.create(
                         order=order, product=book, product_name=book.name,
                         unit_price=book.price, quantity=quantity,
