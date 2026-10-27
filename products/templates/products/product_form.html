@@ -28,6 +28,18 @@
 </div>
 
 <div class="mb-3">
+    {{ form.stock.label_tag }}
+    {{ form.stock }}
+    {{ form.stock.errors }}
+</div>
+
+<div class="mb-3">
+    {{ form.erp_id.label_tag }}
+    {{ form.erp_id }}
+    {{ form.erp_id.errors }}
+</div>
+
+<div class="mb-3">
     {{ form.cover_url.label_tag }}
     {{ form.cover_url }}
     {{ form.cover_url.errors }}
