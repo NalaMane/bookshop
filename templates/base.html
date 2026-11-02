@@ -33,7 +33,7 @@
           <a class="nav-link" href="{% url 'accounts:login' %}">Log in</a>
           <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
         {% endif %}
-        <a class="nav-link" href="{% url 'orders:cart' %}">Cart{% if cart_count %} <span class="cart-badge">{{ cart_count }}</span>{% endif %}</a>
+        <a class="nav-link" href="{% url 'orders:cart' %}">Cart <span id="cart-count" class="cart-badge"{% if not cart_count %} hidden{% endif %}>{{ cart_count }}</span></a>
       </div>
     </div>
   </nav>
@@ -48,5 +48,6 @@
   <footer class="site-footer text-center py-4 mt-4">
     Independent books, thoughtfully chosen. · FH Aachen Lab 1
   </footer>
+  <script src="{% static 'js/cart.js' %}"></script>
 </body>
 </html>

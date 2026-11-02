@@ -27,6 +27,8 @@ def product_list(request):
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
+    cart = Cart(request)
+    product.quantity = cart.data.get(str(product.pk), 0)
     return render(request, "products/product_detail.html", {"product": product})
 
 

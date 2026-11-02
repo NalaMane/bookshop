@@ -40,24 +40,27 @@
             <span class="book-stock text-muted">{{ product.stock }} in stock</span> 
           {% endif %}
 
+          <div class="cart-controls" data-product-card data-stock="{{ product.stock|default_if_none:'' }}" data-quantity="{{ product.quantity }}">
           {% if product.quantity == 0 %}
-          <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
+          <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="cart-ajax-form">{% csrf_token %}
             <button class="btn btn-primary btn-sm" {% if product.stock is None or product.stock == 0 %}disabled{% endif %}>Add to cart</button>
           </form>
           {% else %}
           <div class="btn-group" role="group" aria-label="Cart quantity controls">
-            <form method="post" action="{% url 'orders:cart_update' product.pk %}" class="d-inline">
+            <form method="post" action="{% url 'orders:cart_update' product.pk %}" class="d-inline cart-ajax-form">
               {% csrf_token %}
               <input type="hidden" name="quantity" value="{{ product.quantity|add:'-1' }}">
               <button class="btn btn-outline-primary btn-sm">-</button>
             </form>
-            <div style="padding:5px;">{{ product.quantity }}</div>
+            <div class="cart-quantity" style="padding:5px;">{{ product.quantity }}</div>
 
-            <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="d-inline">{% csrf_token %}
+            <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="d-inline cart-ajax-form">{% csrf_token %}
               <button class="btn btn-outline-primary btn-sm">+</button>
             </form>
           </div>
           {% endif %}
+            <div class="cart-error text-danger small" role="alert" hidden></div>
+          </div>
           
         </div>
       </div>

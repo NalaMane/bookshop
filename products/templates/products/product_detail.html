@@ -20,9 +20,27 @@
       
       <div class="book-description">{{ product.description|linebreaks }}</div>
       <div class="d-flex flex-wrap gap-2">
-        <form method="post" action="{% url 'orders:cart_add' product.pk %}">{% csrf_token %}
-          <button class="btn btn-primary" {% if product.stock is None or product.stock == 0 %}disabled{% endif %}>Add to cart</button>
-        </form>
+        <div data-product-card data-stock="{{ product.stock|default_if_none:'' }}" data-quantity="{{ product.quantity }}">
+          {% if product.quantity %}
+          <div class="btn-group" role="group" aria-label="Cart quantity controls">
+            <form method="post" action="{% url 'orders:cart_update' product.pk %}" class="d-inline cart-ajax-form">
+              {% csrf_token %}
+              <input type="hidden" name="quantity" value="{{ product.quantity|add:'-1' }}">
+              <button class="btn btn-outline-primary btn-sm">-</button>
+            </form>
+            <div class="cart-quantity" style="padding:5px;">{{ product.quantity }}</div>
+            <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="d-inline cart-ajax-form">
+              {% csrf_token %}
+              <button class="btn btn-outline-primary btn-sm">+</button>
+            </form>
+          </div>
+          {% else %}
+          <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="cart-ajax-form">{% csrf_token %}
+            <button class="btn btn-primary" {% if product.stock is None or product.stock == 0 %}disabled{% endif %}>Add to cart</button>
+          </form>
+          {% endif %}
+          <div class="cart-error text-danger small" role="alert" hidden></div>
+        </div>
         {% if user.is_staff %}
           <a class="btn btn-outline-secondary" href="{% url 'products:edit' product.pk %}">Edit</a>
           <a class="btn btn-outline-danger" href="{% url 'products:delete' product.pk %}">Delete</a>

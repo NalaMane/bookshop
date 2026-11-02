@@ -49,6 +49,39 @@ class OrderTests(TestCase):
 
         self.assertEqual(self.client.session.get(CART_SESSION_KEY, {}), {})
 
+    def test_ajax_cart_add_returns_cart_state(self):
+        response = self.client.post(
+            reverse("orders:cart_add", args=[self.book.pk]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {
+                "success": True,
+                "message": '"Dune" added to cart.',
+                "cart_count": 1,
+                "quantity": 1,
+                "stock": 10,
+            },
+        )
+
+    def test_ajax_cart_update_returns_stock_error_without_redirect(self):
+        self.client.post(reverse("orders:cart_add", args=[self.book.pk]))
+        response = self.client.post(
+            reverse("orders:cart_update", args=[self.book.pk]),
+            {"quantity": 11},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["success"], False)
+        self.assertIn("Only 10", response.json()["message"])
+        self.assertEqual(response.json()["cart_count"], 1)
+
     def test_cart_quantity_cannot_exceed_stock(self):
         self.book.stock = 2
         self.book.save(update_fields=["stock"])

@@ -3,11 +3,11 @@
 {% block content %}
 <h1>Your cart</h1>
 {% if items %}
-<table class="table align-middle">
+<table id="cart-table" class="table align-middle">
   <thead><tr><th>Book</th><th>Price</th><th>Quantity</th><th>Subtotal</th><th></th></tr></thead>
   <tbody>
   {% for item in items %}
-  <tr>
+  <tr data-cart-item>
     <td>
       {{ item.product.name }}
       {% if item.product.stock is None %}
@@ -18,19 +18,19 @@
     </td>
     <td>€{{ item.product.price }}</td>
     <td>
-      <form method="post" action="{% url 'orders:cart_update' item.product.pk %}" class="d-inline">{% csrf_token %}
+      <form method="post" action="{% url 'orders:cart_update' item.product.pk %}" class="d-inline cart-ajax-form">{% csrf_token %}
         <input type="hidden" name="quantity" value="{{ item.quantity|add:'-1' }}">
         <button class="btn btn-sm btn-outline-secondary">−</button>
       </form>
-      <span class="mx-2">{{ item.quantity }}</span>
-      <form method="post" action="{% url 'orders:cart_update' item.product.pk %}" class="d-inline">{% csrf_token %}
+      <span class="mx-2 cart-item-quantity">{{ item.quantity }}</span>
+      <form method="post" action="{% url 'orders:cart_update' item.product.pk %}" class="d-inline cart-ajax-form">{% csrf_token %}
         <input type="hidden" name="quantity" value="{{ item.quantity|add:'1' }}">
         <button class="btn btn-sm btn-outline-secondary">+</button>
       </form>
     </td>
-    <td>€{{ item.subtotal }}</td>
+    <td>€<span class="cart-item-subtotal">{{ item.subtotal }}</span></td>
     <td>
-      <form method="post" action="{% url 'orders:cart_remove' item.product.pk %}">{% csrf_token %}
+      <form method="post" action="{% url 'orders:cart_remove' item.product.pk %}" class="cart-ajax-form">{% csrf_token %}
         <button class="btn btn-sm btn-outline-danger">Remove</button>
       </form>
     </td>
@@ -38,9 +38,10 @@
   {% endfor %}
   </tbody>
 </table>
-<p class="fs-4 fw-bold">Total: €{{ total }}</p>
-<a class="btn btn-success" href="{% url 'orders:checkout' %}">Go to checkout</a>
+<p id="cart-total" class="fs-4 fw-bold">Total: €{{ total }}</p>
+<a id="checkout-link" class="btn btn-success" href="{% url 'orders:checkout' %}">Go to checkout</a>
+<p id="cart-empty" hidden>Your cart is empty. <a href="{% url 'products:list' %}">Browse books</a></p>
 {% else %}
-<p>Your cart is empty. <a href="{% url 'products:list' %}">Browse books</a></p>
+<p id="cart-empty">Your cart is empty. <a href="{% url 'products:list' %}">Browse books</a></p>
 {% endif %}
 {% endblock %}

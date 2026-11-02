@@ -6,6 +6,7 @@ Order status is changed by staff in /admin (Orders list). Improve freely.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -13,6 +14,26 @@ from products.models import Product
 
 from .cart import Cart
 from .models import Order, OrderItem
+
+
+def _is_ajax(request):
+    return request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+
+def _cart_json(request, message, *, error=False):
+    return JsonResponse(
+        {
+            "success": not error,
+            "message": message,
+            "cart_count": len(Cart(request)),
+        },
+        status=400 if error else 200,
+    )
+
+
+def _cart_totals(request):
+    cart = Cart(request)
+    return cart, cart.total()
 
 
 def cart_detail(request):
@@ -26,8 +47,20 @@ def cart_add(request, product_id):
     try:
         Cart(request).add(product.pk)
     except ValueError as error:
+        if _is_ajax(request):
+            return _cart_json(request, str(error), error=True)
         messages.error(request, str(error))
         return redirect(request.META.get("HTTP_REFERER", "orders:cart"))  # stay on the same page
+    if _is_ajax(request):
+        return JsonResponse(
+            {
+                "success": True,
+                "message": f'"{product.name}" added to cart.',
+                "cart_count": len(Cart(request)),
+                "quantity": Cart(request).data[str(product.pk)],
+                "stock": product.stock,
+            }
+        )
     messages.success(request, f'"{product.name}" added to cart.')
     return redirect(request.META.get("HTTP_REFERER", "orders:cart"))
 
@@ -39,18 +72,38 @@ def cart_update(request, product_id):
     try:
         quantity = int(raw_quantity)
     except (TypeError, ValueError):
+        if _is_ajax(request):
+            return _cart_json(request, "Please enter a valid quantity.", error=True)
         messages.error(request, "Please enter a valid quantity.")
         return redirect("orders:cart")
 
     if quantity < 0:
+        if _is_ajax(request):
+            return _cart_json(request, "Quantity cannot be negative.", error=True)
         messages.error(request, "Quantity cannot be negative.")
         return redirect("orders:cart")
 
     try:
         Cart(request).set(product_id, quantity)
     except ValueError as error:
+        if _is_ajax(request):
+            return _cart_json(request, str(error), error=True)
         messages.error(request, str(error))
         return redirect("orders:cart")
+    if _is_ajax(request):
+        cart, total = _cart_totals(request)
+        product = get_object_or_404(Product, pk=product_id)
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Basket updated.",
+                "cart_count": len(Cart(request)),
+                "quantity": Cart(request).data.get(str(product.pk), 0),
+                "stock": product.stock,
+                "subtotal": str(product.price * Cart(request).data.get(str(product.pk), 0)),
+                "total": str(total),
+            }
+        )
     messages.success(request, "Basket updated.")
     # return redirect("orders:cart")
     return redirect(request.META.get("HTTP_REFERER", "orders:cart"))
@@ -59,6 +112,17 @@ def cart_update(request, product_id):
 @require_POST
 def cart_remove(request, product_id):
     Cart(request).remove(product_id)
+    if _is_ajax(request):
+        _, total = _cart_totals(request)
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Item removed from your basket.",
+                "cart_count": len(Cart(request)),
+                "removed": True,
+                "total": str(total),
+            }
+        )
     messages.success(request, "Item removed from your basket.")
     return redirect("orders:cart")
 
