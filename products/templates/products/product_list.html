@@ -34,16 +34,18 @@
         <div class="book-card-footer">
           <span class="book-price">€{{ product.price }}</span>
 
-          {% if product.stock is None or product.stock == 0 %}
-            <span class="book-stock text-muted">Out of stock</span>
+          {% if not stock_available %}
+            <span class="book-stock text-warning">Stock information currently unavailable</span>
+          {% elif product.live_stock > 0 %}
+            <span class="book-stock text-success">In stock ({{ product.live_stock }} left)</span>
           {% else %}
-            <span class="book-stock text-muted">{{ product.stock }} in stock</span> 
+            <span class="book-stock text-muted">Out of stock</span>
           {% endif %}
 
-          <div class="cart-controls" data-product-card data-stock="{{ product.stock|default_if_none:'' }}" data-quantity="{{ product.quantity }}">
+          <div class="cart-controls" data-product-card data-stock="{{ product.live_stock|default_if_none:'' }}" data-quantity="{{ product.quantity }}">
           {% if product.quantity == 0 %}
           <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="cart-ajax-form">{% csrf_token %}
-            <button class="btn btn-primary btn-sm" {% if product.stock is None or product.stock == 0 %}disabled{% endif %}>Add to cart</button>
+            <button class="btn btn-primary btn-sm" {% if not product.live_stock %}disabled{% endif %}>Add to cart</button>
           </form>
           {% else %}
           <div class="btn-group" role="group" aria-label="Cart quantity controls">

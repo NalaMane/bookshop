@@ -11,16 +11,18 @@
     <div class="book-detail">
       <h1>{{ product.name }}</h1>
       <p class="book-author">{{ product.author }}</p>
-      {% if product.stock is None or product.stock == 0 %}
-        <span class="book-stock text-muted">Out of stock</span>
+      {% if not stock_available %}
+        <span class="book-stock text-warning">Stock information currently unavailable</span>
+      {% elif product.live_stock > 0 %}
+        <span class="book-stock text-success">In stock ({{ product.live_stock }} left)</span>
       {% else %}
-        <span class="book-stock text-muted">{{ product.stock }} in stock</span>
+        <span class="book-stock text-muted">Out of stock</span>
       {% endif %}
       <p class="book-price book-price-lg">€{{ product.price }}</p>
       
       <div class="book-description">{{ product.description|linebreaks }}</div>
       <div class="d-flex flex-wrap gap-2">
-        <div data-product-card data-stock="{{ product.stock|default_if_none:'' }}" data-quantity="{{ product.quantity }}">
+        <div data-product-card data-stock="{{ product.live_stock|default_if_none:'' }}" data-quantity="{{ product.quantity }}">
           {% if product.quantity %}
           <div class="btn-group" role="group" aria-label="Cart quantity controls">
             <form method="post" action="{% url 'orders:cart_update' product.pk %}" class="d-inline cart-ajax-form">
@@ -36,7 +38,7 @@
           </div>
           {% else %}
           <form method="post" action="{% url 'orders:cart_add' product.pk %}" class="cart-ajax-form">{% csrf_token %}
-            <button class="btn btn-primary" {% if product.stock is None or product.stock == 0 %}disabled{% endif %}>Add to cart</button>
+            <button class="btn btn-primary" {% if not product.live_stock %}disabled{% endif %}>Add to cart</button>
           </form>
           {% endif %}
           <div class="cart-error text-danger small" role="alert" hidden></div>
