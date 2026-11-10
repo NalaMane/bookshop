@@ -166,3 +166,6 @@ ERP_RETRIES = int(os.getenv("ERP_RETRIES", "3"))  # tries for technical errors o
 ERP_RETRY_DELAY = float(os.getenv("ERP_RETRY_DELAY", "0.5"))  # 0.5 s, 1 s, 2 s ...
 # ERP API can't create customers -> fallback when the shop email isn't in the ERP (Christian Drumm, same ID on every ERP start)
 ERP_DEFAULT_CUSTOMER_ID = os.getenv("ERP_DEFAULT_CUSTOMER_ID", "93cada62-c115-47f9-8a06-b56497a60e11")
+# New / changed ERP books are loaded automatically when the book list is opened, at most every N seconds
+# (products/catalog.py). 0 = off. Off in the tests, so no test calls the real ERP.
+ERP_CATALOG_SYNC_SECONDS = 0 if RUNNING_TESTS else int(os.getenv("ERP_CATALOG_SYNC_SECONDS", "60"))

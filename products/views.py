@@ -10,11 +10,13 @@ from .forms import ProductForm
 from .models import Product  
 from orders.cart import Cart
 
+from .catalog import sync_catalog_if_due  # Lab 3: book list from the ERP API
 from .stock import add_live_stock  # Lab 3: live stock from the ERP
 """connects to the model in models.py"""
 
 
 def product_list(request):
+    sync_catalog_if_due()  # new ERP books appear automatically (at most once a minute)
     products = Product.objects.all()
     query = request.GET.get("q")
     products = products.filter(name__icontains=query) if query else products
