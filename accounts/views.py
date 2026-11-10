@@ -11,6 +11,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 
+from .erp_customers import erp_link_status
 from .forms import AddressForm, RegisterForm, StyledPasswordChangeForm, UserUpdateForm
 
 
@@ -33,7 +34,11 @@ def profile(request):
         address_form.save()
         messages.success(request, "Profile updated.")
         return redirect("accounts:profile")
-    return render(request, "accounts/profile.html", {"user_form": user_form, "address_form": address_form})
+    return render(request, "accounts/profile.html", {
+        "user_form": user_form,
+        "address_form": address_form,
+        "erp_status": erp_link_status(request.user),  # Lab 3
+    })
 
 
 @login_required
