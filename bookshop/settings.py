@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -154,3 +155,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Lab 2 – ERP file exchange: inbox / processed / failed
 ERP_EXCHANGE_DIR = BASE_DIR / "erp_exchange"
+
+# Lab 3 – RPC connection to the Mini-ERP (SAP CAP, `cds watch`). Used only by bookshop/erp_client.py.
+# Defaults = the course's local dev ERP; override in .env if yours is different.
+ERP_API_URL = os.getenv("ERP_API_URL", "http://localhost:4004/rest/api")
+ERP_USER = os.getenv("ERP_USER", "service-user")  # technical user, role "system-integration"
+ERP_PASSWORD = os.getenv("ERP_PASSWORD", "service-user")
+ERP_TIMEOUT = float(os.getenv("ERP_TIMEOUT", "5"))  # seconds per call, so a page never hangs
+ERP_RETRIES = int(os.getenv("ERP_RETRIES", "3"))  # tries for technical errors only
+ERP_RETRY_DELAY = float(os.getenv("ERP_RETRY_DELAY", "0.5"))  # 0.5 s, 1 s, 2 s ...
+# ERP API can't create customers -> fallback when the shop email isn't in the ERP (Christian Drumm, same ID on every ERP start)
+ERP_DEFAULT_CUSTOMER_ID = os.getenv("ERP_DEFAULT_CUSTOMER_ID", "93cada62-c115-47f9-8a06-b56497a60e11")
