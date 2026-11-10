@@ -37,7 +37,7 @@
           {% if not stock_available %}
             <span class="book-stock text-warning">Stock information currently unavailable</span>
           {% elif product.live_stock > 0 %}
-            <span class="book-stock text-success">In stock ({{ product.live_stock }} left)</span>
+            <span class="book-stock text-success">{{ product.live_stock }} in stock</span>
           {% else %}
             <span class="book-stock text-muted">Out of stock</span>
           {% endif %}
