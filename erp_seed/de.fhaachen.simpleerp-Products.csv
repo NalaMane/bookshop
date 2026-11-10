@@ -1,0 +1,13 @@
+ID,productID,name,description,price,currency_code,stock
+fa4df88c-bd72-594d-8a3d-5a7fec8f981c,9780141439518,Pride and Prejudice,A classic novel of manners and marriage.,9.99,EUR,20
+8503697f-c5d7-50f3-b4a9-f58c626a6221,9780451524935,1984,A dystopian story about surveillance and control.,12.50,EUR,25
+e4b9ee0c-3adf-55dc-9574-f07d15d23470,9780547928227,The Hobbit,Bilbo Baggins sets off on an unexpected journey.,14.90,EUR,15
+4bf063bc-037b-517d-a0fd-d1ef193b3991,9780132350884,Clean Code,A handbook of agile software craftsmanship.,34.99,EUR,8
+0fafae4b-1441-5a69-9475-ecfc5c8688fb,9780062316097,Sapiens,A brief history of humankind.,18.00,EUR,12
+bd8cbcd7-1b1d-5046-9c55-19866fa82b20,9780156012195,The Little Prince,A poetic tale about love and loss.,7.95,EUR,30
+7ebd14f7-805e-588a-828d-f799c729418c,9780441172719,Dune,Politics and survival on the desert planet Arrakis.,16.99,EUR,10
+8cb2b96d-b577-588a-b0d7-2d9728cffc49,9780735211292,Atomic Habits,"Small changes, remarkable results.",19.90,EUR,18
+6814f1a0-afb4-5388-9cfc-8a6084318a99,9780143058144,Crime and Punishment,A student's crime and its consequences.,11.50,EUR,5
+542a2118-e6e0-51b6-b438-41667a2cb8ec,9781593279288,Python Crash Course,A hands-on introduction to programming.,29.99,EUR,7
+f86e7387-e67c-58e1-b563-29842c1f5bbe,9780446608954,A Walk to Remember,A love story by Nicholas Sparks.,8.99,EUR,12
+0a1054cf-001c-510d-9604-dd1fb505e5e4,9780590353427,Harry Potter and the Sorcerer's Stone,A fantasy novel by J.K. Rowling.,12.99,EUR,20
