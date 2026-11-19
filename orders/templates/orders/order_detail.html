@@ -3,6 +3,7 @@
 {% block content %}
 <h1>Order #{{ order.pk }}</h1>
 <p>Placed {{ order.created_at|date:"d.m.Y H:i" }} · Status: <span class="badge bg-secondary">{{ order.get_status_display }}</span></p>
+{% if order.erp_order_id %}<p>ERP order #{{ order.erp_order_id }}</p>{% endif %}
 <ul class="list-group mb-3">
   {% for item in order.items.all %}
   <li class="list-group-item d-flex justify-content-between">

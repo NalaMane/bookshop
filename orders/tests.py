@@ -1,4 +1,6 @@
 from decimal import Decimal
+from types import SimpleNamespace
+from unittest import mock
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -6,8 +8,11 @@ from django.urls import reverse
 
 from products.models import Product
 
+from bookshop import erp_client as erp
+
 from .cart import CART_SESSION_KEY, MAX_ITEM_QUANTITY
 from .models import Order
+from . import views
 
 
 class OrderTests(TestCase):
@@ -16,6 +21,14 @@ class OrderTests(TestCase):
         self.user = User.objects.create_user("anna", password="test-password")
         self.user.profile.address = "Main Street 1, 52062 Aachen"
         self.user.profile.save()
+        self.erp_customer = mock.patch.object(
+            views, "erp_customer_for", return_value=SimpleNamespace(id="erp-customer")
+        )
+        self.create_erp_order = mock.patch.object(erp, "create_order", return_value=42)
+        self.erp_customer.start()
+        self.create_erp_order.start()
+        self.addCleanup(self.erp_customer.stop)
+        self.addCleanup(self.create_erp_order.stop)
 
     def test_checkout_creates_order_with_correct_total(self):
         self.client.login(username="anna", password="test-password")
@@ -29,8 +42,24 @@ class OrderTests(TestCase):
         self.assertEqual(order.status, Order.Status.PENDING)
         self.assertEqual(order.items.first().quantity, 2)
         self.book.refresh_from_db()
-        self.assertEqual(self.book.stock, 8)
-        self.assertRedirects(response, reverse("products:list"))
+        self.assertEqual(self.book.stock, 10)
+        self.assertEqual(order.erp_order_id, 42)
+        self.assertRedirects(response, reverse("orders:detail", args=[order.pk]))
+
+    def test_checkout_allows_reused_erp_order_id_after_erp_restart(self):
+        existing = Order.objects.create(
+            customer=self.user,
+            shipping_address="Existing address",
+            erp_order_id=42,
+        )
+        self.client.force_login(self.user)
+        self.client.post(reverse("orders:cart_add", args=[self.book.pk]))
+
+        response = self.client.post(reverse("orders:checkout"))
+
+        new_order = Order.objects.exclude(pk=existing.pk).get(customer=self.user)
+        self.assertEqual(new_order.erp_order_id, 42)
+        self.assertRedirects(response, reverse("orders:detail", args=[new_order.pk]))
 
     def test_out_of_stock_product_cannot_be_added(self):
         self.book.stock = 0
@@ -116,15 +145,21 @@ class OrderTests(TestCase):
     def test_checkout_rejects_stock_that_changed_after_add(self):
         self.client.force_login(self.user)
         self.client.post(reverse("orders:cart_add", args=[self.book.pk]))
-        self.book.stock = 0
-        self.book.save(update_fields=["stock"])
+        self.create_erp_order.stop()
+        self.create_erp_order = mock.patch.object(
+            erp,
+            "create_order",
+            side_effect=erp.InsufficientStock("Only 0 left in stock."),
+        )
+        self.create_erp_order.start()
+        self.addCleanup(self.create_erp_order.stop)
 
         response = self.client.post(reverse("orders:checkout"))
 
         self.assertRedirects(response, reverse("orders:cart"))
         self.assertFalse(Order.objects.filter(customer=self.user).exists())
         self.book.refresh_from_db()
-        self.assertEqual(self.book.stock, 0)
+        self.assertEqual(self.book.stock, 10)
 
     def test_cart_update_rejects_invalid_quantity(self):
         self.client.post(reverse("orders:cart_add", args=[self.book.pk]))

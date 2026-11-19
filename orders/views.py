@@ -12,6 +12,9 @@ from django.views.decorators.http import require_POST
 
 from products.models import Product
 
+from accounts.erp_customers import erp_customer_for
+from bookshop import erp_client as erp
+
 from .cart import Cart
 from .models import Order, OrderItem
 
@@ -141,37 +144,33 @@ def checkout(request):
             messages.error(request, "Please add a shipping address to your profile before ordering.")
             return redirect("accounts:profile")
 
-        with transaction.atomic():
-            locked_products = {
-                product.pk: product
-                for product in Product.objects.select_for_update().filter(
-                    pk__in=[item["product"].pk for item in items]
-                )
-            }
-            for item in items:
-                product = locked_products.get(item["product"].pk)
-                if product is None:
-                    messages.error(request, "A book in your cart is no longer available.")
-                    return redirect("orders:cart")
-                if product.stock is None:
-                    messages.error(
-                        request,
-                        f'"{product.name}" is no longer available for purchase.',
-                    )
-                    return redirect("orders:cart")
-                if item["quantity"] > product.stock:
-                    messages.error(
-                        request,
-                        f'Only {product.stock} of "{product.name}" are currently in stock.',
-                    )
-                    return redirect("orders:cart")
+        try:
+            erp_customer = erp_customer_for(request.user)
+            erp_order_id = erp.create_order(
+                erp_customer.id,
+                [(item["product"].erp_id, item["quantity"]) for item in items],
+            )
+        except erp.InsufficientStock as error:
+            messages.error(request, error.message)
+            return redirect("orders:cart")
+        except erp.ERPUnavailable:
+            messages.error(request, "Orders cannot be placed right now. Please try again later.")
+            return redirect("orders:cart")
+        except erp.ERPBusinessError as error:
+            messages.error(request, error.message)
+            return redirect("orders:cart")
+        except erp.ERPConfigError:
+            messages.error(request, "The ERP is not configured correctly. Please try again later.")
+            return redirect("orders:cart")
 
+        with transaction.atomic():
             order = Order.objects.create(
                 customer=request.user,
                 shipping_address=shipping_address,
+                erp_order_id=erp_order_id,
             )
             for item in items:
-                product = locked_products[item["product"].pk]
+                product = item["product"]
                 OrderItem.objects.create(
                     order=order,
                     product=product,
@@ -179,12 +178,10 @@ def checkout(request):
                     unit_price=product.price,
                     quantity=item["quantity"],
                 )
-                product.stock -= item["quantity"]
-                product.save(update_fields=["stock"])
             order.recalculate_total()
         cart.clear()
-        messages.success(request, "Thank you! Your order was placed.")
-        return redirect("products:list")
+        messages.success(request, f"Thank you! Your order was placed (ERP order #{erp_order_id}).")
+        return redirect("orders:detail", pk=order.pk)
 
     return render(request, "orders/checkout.html", {"items": items, "total": cart.total()})
 

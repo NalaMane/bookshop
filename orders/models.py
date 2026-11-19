@@ -15,6 +15,7 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     shipping_address = models.TextField()  # copied from the profile at checkout
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    erp_order_id = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
