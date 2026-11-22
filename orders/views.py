@@ -41,7 +41,9 @@ def _cart_totals(request):
 
 def cart_detail(request):
     cart = Cart(request)
-    return render(request, "orders/cart.html", {"items": cart.items(), "total": cart.total()})
+    items = cart.items()
+    add_live_stock([item["product"] for item in items])
+    return render(request, "orders/cart.html", {"items": items, "total": cart.total()})
 
 
 @require_POST
@@ -98,7 +100,6 @@ def cart_update(request, product_id):
         return redirect("orders:cart")
     if _is_ajax(request):
         cart, total = _cart_totals(request)
-        product = get_object_or_404(Product, pk=product_id)
         return JsonResponse(
             {
                 "success": True,

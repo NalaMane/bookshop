@@ -114,6 +114,24 @@ class OrderTests(TestCase):
             },
         )
 
+    def test_cart_page_uses_erp_stock_when_local_stock_is_empty(self):
+        self.book.erp_id = "9780441172719"
+        self.book.stock = None
+        self.book.save(update_fields=["erp_id", "stock"])
+        self.client.force_login(self.user)
+        session = self.client.session
+        session[CART_SESSION_KEY] = {str(self.book.pk): 2}
+        session.save()
+
+        with mock.patch("orders.views.add_live_stock") as live_stock:
+            live_stock.side_effect = lambda products: setattr(
+                products[0], "live_stock", 10
+            ) or True
+            response = self.client.get(reverse("orders:cart"))
+
+        self.assertContains(response, "10 in stock")
+        self.assertNotContains(response, "No longer available")
+
     def test_ajax_cart_update_returns_stock_error_without_redirect(self):
         self.client.post(reverse("orders:cart_add", args=[self.book.pk]))
         response = self.client.post(
@@ -127,6 +145,43 @@ class OrderTests(TestCase):
         self.assertEqual(response.json()["success"], False)
         self.assertIn("Only 10", response.json()["message"])
         self.assertEqual(response.json()["cart_count"], 1)
+
+    def test_ajax_cart_plus_updates_quantity_and_subtotal(self):
+        self.client.post(reverse("orders:cart_add", args=[self.book.pk]))
+
+        response = self.client.post(
+            reverse("orders:cart_update", args=[self.book.pk]),
+            {"quantity": 2},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["quantity"], 2)
+        self.assertEqual(response.json()["subtotal"], "20.00")
+        self.assertEqual(response.json()["total"], "20.00")
+        self.assertEqual(
+            self.client.session[CART_SESSION_KEY],
+            {str(self.book.pk): 2},
+        )
+
+    def test_ajax_cart_minus_updates_quantity_and_subtotal(self):
+        self.client.post(reverse("orders:cart_add", args=[self.book.pk]))
+        self.client.post(
+            reverse("orders:cart_update", args=[self.book.pk]),
+            {"quantity": 2},
+        )
+        response = self.client.post(
+            reverse("orders:cart_update", args=[self.book.pk]),
+            {"quantity": 1},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["quantity"], 1)
+        self.assertEqual(response.json()["subtotal"], "10.00")
+        self.assertEqual(response.json()["total"], "10.00")
 
     def test_cart_quantity_cannot_exceed_stock(self):
         self.book.stock = 2

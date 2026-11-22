@@ -10,10 +10,12 @@
   <tr data-cart-item>
     <td>
       {{ item.product.name }}
-      {% if item.product.stock is None %}
+      {% if item.product.live_stock is None %}
+        <div class="text-warning small">Stock information unavailable</div>
+      {% elif item.product.live_stock == 0 %}
         <div class="text-danger small">No longer available</div>
       {% else %}
-        <div class="text-muted small">{{ item.product.stock }} in stock</div>
+        <div class="text-muted small">{{ item.product.live_stock }} in stock</div>
       {% endif %}
     </td>
     <td>€{{ item.product.price }}</td>
