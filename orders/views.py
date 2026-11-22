@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from products.models import Product
-
+from products.stock import add_live_stock
 from accounts.erp_customers import erp_customer_for
 from bookshop import erp_client as erp
 
@@ -47,6 +47,7 @@ def cart_detail(request):
 @require_POST
 def cart_add(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
+    add_live_stock([product])
     try:
         Cart(request).add(product.pk)
     except ValueError as error:
@@ -61,7 +62,7 @@ def cart_add(request, product_id):
                 "message": f'"{product.name}" added to cart.',
                 "cart_count": len(Cart(request)),
                 "quantity": Cart(request).data[str(product.pk)],
-                "stock": product.stock,
+                "stock": product.live_stock,
             }
         )
     messages.success(request, f'"{product.name}" added to cart.')
@@ -72,6 +73,7 @@ def cart_add(request, product_id):
 def cart_update(request, product_id):
     """Set the quantity. Template sends quantity = current +/- 1. 0 removes the item."""
     raw_quantity = request.POST.get("quantity", "")
+    add_live_stock([product])
     try:
         quantity = int(raw_quantity)
     except (TypeError, ValueError):
@@ -102,7 +104,7 @@ def cart_update(request, product_id):
                 "message": "Basket updated.",
                 "cart_count": len(Cart(request)),
                 "quantity": Cart(request).data.get(str(product.pk), 0),
-                "stock": product.stock,
+                "stock": product.live_stock,
                 "subtotal": str(product.price * Cart(request).data.get(str(product.pk), 0)),
                 "total": str(total),
             }

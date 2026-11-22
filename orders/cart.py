@@ -2,6 +2,7 @@
 from decimal import Decimal
 
 from products.models import Product
+from products.stock import add_live_stock
 
 CART_SESSION_KEY = "cart"
 MAX_ITEM_QUANTITY = 99
@@ -75,9 +76,12 @@ class Cart:
             product = Product.objects.only("stock").get(pk=product_id)
         except Product.DoesNotExist as error:
             raise ValueError("This book is no longer available.") from error
-        if product.stock is None:
+
+        add_live_stock([product])
+        
+        if product.live_stock is None:
             raise ValueError("This book is not available for purchase.")
-        if quantity > product.stock:
+        if quantity > product.live_stock:
             raise ValueError(
-                f"Only {product.stock} of this book are currently in stock."
+                f"Only {product.live_stock} of this book are currently in stock."
             )
