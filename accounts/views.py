@@ -4,15 +4,45 @@ Basic working versions of register / login / logout / profile / purchase history
 Improve freely: validation messages, styling, password change, etc.
 """
 from django.contrib import messages
-from django.contrib.auth import login
+import json
+
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import PasswordChangeView
+from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core import signing
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
+
+from orders.cart import (
+    CART_SESSION_KEY,
+    PRESERVED_CART_COOKIE,
+    PRESERVED_CART_COOKIE_SALT,
+)
 
 from .erp_customers import erp_link_status
 from .forms import AddressForm, RegisterForm, StyledPasswordChangeForm, UserUpdateForm
+
+
+class PreservingLoginView(LoginView):
+    def form_valid(self, form):
+        cart = dict(self.request.session.get(CART_SESSION_KEY, {}))
+        if not cart:
+            try:
+                preserved_json = self.request.get_signed_cookie(
+                    PRESERVED_CART_COOKIE,
+                    salt=PRESERVED_CART_COOKIE_SALT,
+                )
+                preserved = json.loads(preserved_json)
+            except (KeyError, signing.BadSignature, json.JSONDecodeError, TypeError):
+                cart = {}
+            else:
+                cart = preserved if isinstance(preserved, dict) else {}
+        response = super().form_valid(form)
+        self.request.session[CART_SESSION_KEY] = cart
+        self.request.session.modified = True
+        return response
 
 
 def register(request):
@@ -23,6 +53,21 @@ def register(request):
         messages.success(request, "Welcome! Your account was created.")
         return redirect("products:list")
     return render(request, "accounts/register.html", {"form": form})
+
+
+@require_POST
+def logout_view(request):
+    """Log out without discarding the session-based shopping cart."""
+    cart = dict(request.session.get(CART_SESSION_KEY, {}))
+    logout(request)
+    response = redirect("products:list")
+    response.set_signed_cookie(
+        PRESERVED_CART_COOKIE,
+        json.dumps(cart),
+        salt=PRESERVED_CART_COOKIE_SALT,
+        max_age=30 * 24 * 60 * 60,
+    )
+    return response
 
 
 @login_required

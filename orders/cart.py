@@ -1,16 +1,32 @@
 """Session-based shopping cart. Stored as {"<product_id>": quantity} in the session."""
+import json
 from decimal import Decimal
+
+from django.core import signing
 
 from products.models import Product
 from products.stock import add_live_stock
 
 CART_SESSION_KEY = "cart"
+PRESERVED_CART_COOKIE = "preserved_cart"
+PRESERVED_CART_COOKIE_SALT = "bookshop-cart"
 MAX_ITEM_QUANTITY = 99
 
 
 class Cart:
     def __init__(self, request):
         self.session = request.session
+        if CART_SESSION_KEY not in self.session:
+            try:
+                preserved_json = request.get_signed_cookie(
+                    PRESERVED_CART_COOKIE,
+                    salt=PRESERVED_CART_COOKIE_SALT,
+                )
+                preserved = json.loads(preserved_json)
+            except (KeyError, signing.BadSignature, json.JSONDecodeError, TypeError):
+                preserved = {}
+            if isinstance(preserved, dict):
+                self.session[CART_SESSION_KEY] = preserved
         self.data = self.session.setdefault(CART_SESSION_KEY, {})
 
     def add(self, product_id, quantity=1):
