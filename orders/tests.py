@@ -21,6 +21,23 @@ class OrderTests(TestCase):
         self.user = User.objects.create_user("anna", password="test-password")
         self.user.profile.address = "Main Street 1, 52062 Aachen"
         self.user.profile.save()
+        def set_local_stock_as_live(products):
+            for product in products:
+                product.live_stock = product.stock
+            return True
+
+        self.live_cart_stock = mock.patch(
+            "orders.cart.add_live_stock",
+            side_effect=set_local_stock_as_live,
+        )
+        self.live_view_stock = mock.patch(
+            "orders.views.add_live_stock",
+            side_effect=set_local_stock_as_live,
+        )
+        self.live_cart_stock.start()
+        self.live_view_stock.start()
+        self.addCleanup(self.live_cart_stock.stop)
+        self.addCleanup(self.live_view_stock.stop)
         self.erp_customer = mock.patch.object(
             views, "erp_customer_for", return_value=SimpleNamespace(id="erp-customer")
         )

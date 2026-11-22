@@ -73,6 +73,7 @@ def cart_add(request, product_id):
 def cart_update(request, product_id):
     """Set the quantity. Template sends quantity = current +/- 1. 0 removes the item."""
     raw_quantity = request.POST.get("quantity", "")
+    product = get_object_or_404(Product, pk=product_id)
     add_live_stock([product])
     try:
         quantity = int(raw_quantity)
